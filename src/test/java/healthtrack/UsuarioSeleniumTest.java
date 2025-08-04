@@ -6,6 +6,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.junit.jupiter.api.*;
 
+@Disabled("No se ejecuta en CI/CD sin entorno gráfico")
 public class UsuarioSeleniumTest {
 
     private static WebDriver driver;
