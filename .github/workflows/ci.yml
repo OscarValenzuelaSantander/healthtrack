@@ -1,0 +1,51 @@
+name: Java CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Compilar proyecto con Maven
+        run: mvn -B clean install
+
+      - name: Ejecutar pruebas unitarias y funcionales
+        run: mvn test
+
+      - name: Generar reporte de pruebas
+        run: mvn surefire-report:report
+
+      - name: Publicar reporte de pruebas como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-pruebas
+          path: target/site/surefire-report.html
+
+  sonar:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configurar JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn sonar:sonar -Dsonar.projectKey=tu-proyecto -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
